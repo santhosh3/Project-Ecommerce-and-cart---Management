@@ -8,4 +8,21 @@ const isValid = function (value){
     if (typeof (value) === null){return false}
 }
 
-module.exports = {isValid}
+// The test() method executes a search for a match between a regular expression and a specified string. Returns true or false.
+
+const isEmailValid = function (email) {
+    return /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email);
+}
+
+const isPhoneValid = function(phone){
+    return /^[6-9]\d{9}$/.test(phone)
+}
+
+const isValidPincode = function(pincode){
+    if ( /^\+?([1-9]{1})\)?([0-9]{5})$/.test(pincode)) {return true}
+}
+
+
+
+
+module.exports = {isValid,isEmailValid,isPhoneValid,isValidPincode}
