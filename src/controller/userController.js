@@ -1,5 +1,6 @@
 const userModel = require("../model/userModel")
 const validator = require("../validator/validation")
+const jwt = require("jsonwebtoken");
 const aws = require("../aws/aws")
 const bcrypt = require("bcrypt")
 
@@ -85,8 +86,49 @@ let createUser = async (req,res) =>{
     }
 }
 
+const loginUser = async function (req, res) {
+  try{
+    let data = req.body
+
+  // checking if user does not enters any data
+  if (Object.keys(data) == 0) { return res.status(400).send({status:false,message:"Please provide email and password"})}
+
+  // checking for email
+  if (!(validator.isValid(data.email))) { return res.status(400).send({status:false, message:"please enter email"}) }
+  if (!(validator.isEmailValid(data.email))) { return res.status(400).send({status:false, message:"please enter valid Email"}) }
+
+   // checking for password
+   if (!data.password) return res.status(400).send({ status: false, message: "please enter password"})
+   if(data.password.trim().length<8 || data.password.trim().length>15) {return res.status(400).send({ status: false, message: 'Password should be of minimum 8 characters & maximum 15 characters' })}
+
+   let findUser = await userModel.findOne({email: data.email}) 
+
+   if (!findUser)  return res.status(404).send({ status: false, message: "email is not correct"})
+
+   let isValidPassword = await bcrypt.compare(data.password, findUser.password)
+
+   if(!isValidPassword) return res.status(404).send({ status: false, message: "password is not correct"});
+
+   let currTime = Math.floor(Date.now()/1000)
+     let token = jwt.sign(
+       {
+        userId: findUser._id.toString(),
+        iat: currTime,
+        exp: currTime + 1200
+      }, "functionUp"
+
+    );
+    res.setHeader("Authorization", token)
+    return res.status(200).send({ status: true, message: 'User login successfull', data:{userId: `${findUser._id}`, token: token} });
+  }
+
+  catch(error){
+    res.status(500).send({status:false, message:error.message})
+  }
+  
+}
 
 
 
-module.exports = {createUser}
+module.exports = {createUser, loginUser}
 
