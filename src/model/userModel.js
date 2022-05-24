@@ -8,14 +8,18 @@ const userSchema = new mongoose.Schema({
     phone : {type:String, required:true, unique:true, trim:true},
     password : {type:String, required:true, minlength: 8, maxlength: 15},
     address : { 
+      shipping : {
              street: {type:String, required:true},
              city: {type:String, required:true},
              pincode: {type:String, required:true}
-              },
-    billing: {
+                 },
+      billing : {
                 street: {type:String, required:true},
                 city: {type:String, required:true},
                 pincode: {type:Number, required:true}
-              },
+                },
+              }
 
 },{ timestamps: true })
+
+module.exports = mongoose.model("user", userSchema)
