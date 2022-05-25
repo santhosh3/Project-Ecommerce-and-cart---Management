@@ -272,14 +272,7 @@ const updateUser = async function(req, res) {
         if (!(validator.isValidPincode(address.billing.pincode))) { return res.status(400).send({status:false, message:"Please provide pincode in 6 digit number"})}
           updatedData["address.billing.pincode"] = address.billing.pincode
       
-  
-
-  
-      
-          
-  
-
-  //=========================================update data=============================
+ //=========================================update data=============================
 
   const updatedUser = await userModel.findOneAndUpdate({ _id: userIdFromParams }, updatedData, { new: true })
 
