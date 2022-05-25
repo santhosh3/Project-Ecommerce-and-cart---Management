@@ -98,7 +98,7 @@ const loginUser = async function (req, res) {
    if (!data.password) return res.status(400).send({ status: false, message: "please enter password"})
    if(data.password.trim().length<8 || data.password.trim().length>15) {return res.status(400).send({ status: false, message: 'Password should be of minimum 8 characters & maximum 15 characters' })}
 
-   let findUser = await userModel.findOne({email: data.email}) 
+   let findUser = await userModel.findOne({email: data.email})
 
    if (!findUser)  return res.status(404).send({ status: false, message: "email is not correct"})
 
@@ -115,7 +115,8 @@ const loginUser = async function (req, res) {
       }, "functionUp"
 
     );
-    res.setHeader("Authorization", token)
+    res.header('Authorization', token)
+    console.log(token)
     return res.status(200).send({ status: true, message: 'User login successfull', data:{userId: `${findUser._id}`, token: token} });
   }
 
@@ -125,5 +126,36 @@ const loginUser = async function (req, res) {
   
 }
 
-module.exports = {createUser, loginUser}
+const getDetails = async function (req, res) {
+  try {
+      let userId = req.params.userId;
+      if(!validator.isValidObjectId(userId)){
+        return res.status(400).send({ status: false, message: "Inavlid userId." })
+      }
+          let findData = await userModel.findById(userId);
+          if (!findData) {
+              return res.status(404).send({ status: false, message: "No user Found" });
+          }  
+          if (userId != req.userId) {  
+            return res.status(401).send({ status: false, message: "not Authorize" });
+        } 
+              const finalData = {
+                  address: findData.address,
+                  _id: findData._id,
+                  fname: findData.fname,
+                  lname: findData.lname,
+                  email: findData.email,
+                  profileImage: findData.profileImage,
+                  phone: findData.phone,
+                  password: findData.password,
+              }
+              return res.status(200).send({ status: true, message: "User Profile Details...", data: finalData })
+
+  } catch (err) {
+      console.log(err);
+      res.status(500).send({ status: false, message: err });
+  }
+}
+
+module.exports = {createUser, loginUser, getDetails}
 

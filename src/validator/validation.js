@@ -22,7 +22,10 @@ const isValidPincode = function(pincode){
     if ( /^\+?([1-9]{1})\)?([0-9]{5})$/.test(pincode)) {return true}
 }
 
+const isValidObjectId = function(objectId) {
+    return mongoose.Types.ObjectId.isValid(objectId)
+}
 
 
 
-module.exports = {isValid,isEmailValid,isPhoneValid,isValidPincode}
+module.exports = {isValid,isEmailValid,isPhoneValid,isValidPincode, isValidObjectId}
