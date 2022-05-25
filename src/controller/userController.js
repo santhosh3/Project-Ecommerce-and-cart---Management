@@ -10,9 +10,6 @@ let createUser = async (req,res) =>{
         let data = req.body
         let files = req.files
 
-        // Object Destructing
-        // let { fname, lname, email, phone, password, address} = data
-
         // checking if user does not enters any data
         if (Object.keys(data) == 0) { return res.status(400).send({status:false,message:"No data provided"})}
 
@@ -27,7 +24,7 @@ let createUser = async (req,res) =>{
         // checking for fname 
         if (!(validator.isValid(data.fname))) { return res.status(400).send({status:false, message:"please enter first name"}) }
 
-        // checking for fname 
+        // checking for lname 
         if (!(validator.isValid(data.lname))) { return res.status(400).send({status:false, message:"please enter last name"}) }
 
         // checking for email
@@ -79,7 +76,7 @@ let createUser = async (req,res) =>{
 
 
         let result = await userModel.create(data)
-          res.status(200).send({status:true, message:"User created successfully", data:result})
+          res.status(201).send({status:true, message:"User created successfully", data:result})
         }
     catch(error){
         res.status(500).send({status:false, message:error.message})
@@ -127,8 +124,6 @@ const loginUser = async function (req, res) {
   }
   
 }
-
-
 
 module.exports = {createUser, loginUser}
 
