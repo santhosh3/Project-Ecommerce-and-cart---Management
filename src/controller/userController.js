@@ -19,7 +19,7 @@ let createUser = async (req,res) =>{
         if ( files && files.length > 0){
             let uploadFileUrl = await aws.uploadFile(files[0])
             data.profileImage = uploadFileUrl
-            console.log(data.profileImage)
+            
         }
         else{"please provide the image"}
 
@@ -120,7 +120,7 @@ const loginUser = async function (req, res) {
 
     );
     res.header('Authorization', token)
-    console.log(token)
+    // console.log(token)
     return res.status(200).send({ status: true, message: 'User login successfull', data:{userId: `${findUser._id}`, token: token} });
   }
 
@@ -279,6 +279,7 @@ const updateUser = async function(req, res) {
   return res.status(200).send({ status: true, message: "User profile updated", data: updatedUser });
 
 }
+
 
 module.exports = {createUser, loginUser, getDetails,updateUser}
 

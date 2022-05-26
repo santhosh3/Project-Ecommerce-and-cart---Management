@@ -1,10 +1,9 @@
-const { default: mongoose } = require("mongoose");
-
+const { default: mongoose } = require("mongoose"); 
+//@ts-check
 const isValid = function (value){
     if (typeof (value) === "undefined" || typeof (value) === null) {return false}
     if (typeof (value) === "string" && value.trim().length > 0) {return true}
     if (typeof (value) === "number" && value.toString().trim().length > 0){return true}
-    if (typeof (value) === "object" && value.length > 0){return true}
     if (typeof (value) === null){return false}
 }
 
@@ -28,4 +27,14 @@ const isValidObjectId = function(objectId) {
 
 
 
-module.exports = {isValid,isEmailValid,isPhoneValid,isValidPincode, isValidObjectId}
+const isValidString = (String) => {
+    return /\d/.test(String)
+  }
+
+const isValidSize = (sizes) => {
+    return ["S", "XS","M","X", "L","XXL", "XL"].includes(sizes);
+  }
+  
+
+
+module.exports = {isValid,isEmailValid,isPhoneValid,isValidPincode, isValidObjectId,isValidSize,isValidString}
