@@ -8,8 +8,8 @@ const cartSchema = new mongoose.Schema(
           productId: {type:ObjectId, ref:"product", required:true},
           quantity: {type:Number, required:true}
         }],
-        totalPrice: {type:Number, required:true,  default: 0, comment: "Holds total price of all the items in the cart"},
-        totalItems: {type:Number, required:true, comment: "Holds total number of items in the cart"},
+        totalPrice: {type:Number, required:true,  default: 0},  //, comment: "Holds total price of all the items in the cart"
+        totalItems: {type:Number, required:true },  //"Holds total number of items in the cart"
         
       },{timestamps:true}
       

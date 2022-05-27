@@ -97,16 +97,57 @@ const createProduct = async function (req, res) {
       }
   }
 
-const getProducts = function (req,res){
+  const getProducts = async (req, res) => {
     try{
-        const queryData = req.query;
-        let filter = { isDeleted: false }
+        const filterQuery = { isDeleted: false }
+        const queryParams = req.query
+    
+        let { size, name, priceGreaterThan, priceLessThan, priceSort } = queryParams
 
-        const { size, name, priceGreaterThan, priceLessThan, priceSort } = queryData
-
+        if (size) {
+            if (["S", "XS", "M", "X", "L", "XXL", "XL"].indexOf(size) == -1)  return res.status(400).send({ status: false, message: `Size should be among ${["S", "XS", "M", "X", "L", "XXL", "XL"]}` })
+            filterQuery['availableSizes'] = size
+        }
+    
+        if (name) {
+            if (!validator.isValid(name)) return res.status(400).send({ status: false, message: 'name is invalid' })
+            filterQuery['title'] = name
+        }
+    
+        if (priceGreaterThan && priceLessThan) {
+            console.log("both given");
+            filterQuery['price'] = { $gte: priceGreaterThan, $lte: priceLessThan }
+        }
+    
+        if (priceGreaterThan) {
+            console.log("only 1 given");
+            filterQuery['price'] = { $gte: priceGreaterThan }
+        }
+    
+        if (priceLessThan) {
+            console.log("only 2 given");
+            filterQuery['price'] = { $lte: priceLessThan }
+        }
+    
+        if (priceSort) {
+            if (priceSort == 1) {
+                const products = await productModel.find(filterQuery).sort({ price: 1 })
+                if(Object.keys(products).length ==0){return res.status(400).send({status:false, message: "No product found"})}
+                return res.status(200).send({ status: true, message: 'Success', data: products })
+            }
+            if (priceSort == -1) {
+                const products = await productModel.find(filterQuery).sort({ price: -1 })
+                if(Object.keys(products).length ==0){return res.status(400).send({status:false, message: "No product found"})}
+                return res.status(200).send({ status: true, message: 'Success', data: products })
+            }
+        }
+        const products = await productModel.find(filterQuery)
+        if(Object.keys(products).length ==0){return res.status(400).send({status:false, message: "No product found"})}
+        return res.status(200).send({ status: true, message: "Success", data: products })
     }
-    catch(error){
-        return res.status(500).send({ status: false, message: err.message })
+    catch (err) {
+        console.log(err)
+        return res.status(500).send({ Error: err.message })
     }
 }
 
