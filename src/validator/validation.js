@@ -34,7 +34,14 @@ const isValidString = (String) => {
 const isValidSize = (sizes) => {
     return ["S", "XS","M","X", "L","XXL", "XL"].includes(sizes);
   }
-  
+
+const isValidPrice =(price)=>{
+   return /^[0-9]+$/.test(price)
+}
+
+const isValidInstalments = (installments)=>{
+   return /^[0-9]+$/.test(installments)
+}
 
 
-module.exports = {isValid,isEmailValid,isPhoneValid,isValidPincode, isValidObjectId,isValidSize,isValidString}
+module.exports = {isValid,isEmailValid,isPhoneValid,isValidPincode, isValidObjectId,isValidSize,isValidString,isValidPrice,isValidInstalments}
