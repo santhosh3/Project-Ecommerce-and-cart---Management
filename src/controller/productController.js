@@ -85,9 +85,6 @@ const createProduct = async function (req, res) {
             }
         }
     
-  
-       
-
         if(data.isDeleted === true) {
           return res.status(400).send({status:false, message:"Bad Request"})//not working 
          }
@@ -100,8 +97,17 @@ const createProduct = async function (req, res) {
       }
   }
 
-  const getProducts = async (req,res)=> {
-    let getData = await find({isDeleted : false })
+const getProducts = function (req,res){
+    try{
+        const queryData = req.query;
+        let filter = { isDeleted: false }
+
+        const { size, name, priceGreaterThan, priceLessThan, priceSort } = queryData
+
+    }
+    catch(error){
+        return res.status(500).send({ status: false, message: err.message })
+    }
 }
 
 const getProductbyId = async function (req, res) {
@@ -128,7 +134,7 @@ const updateProduct = async function (req, res) {
         let data = req.body;
         const productId = req.params.productId
 
-        const { title, description, price, currencyId, currencyFormat, installments,availableSizes } = data
+        const { title, description, price, currencyId, currencyFormat, installments,availableSizes, isFreeShipping } = data
 
         const dataObject = {};
 
@@ -217,6 +223,16 @@ const updateProduct = async function (req, res) {
             }
             dataObject["installments"]=installments
         }
+
+        if(isFreeShipping) {
+            if(validator.isValid(isFreeShipping)){
+                if(isFreeShipping != Boolean){
+                return res.status(400).send({ status: false, message: "Invalid isFreeShipping" })
+                }
+                dataObject["isFreeShipping"] = isFreeShipping
+            }
+
+        }
     
         let updatedProduct = await productModel.findOneAndUpdate({_id:productId},dataObject,{ new: true })
 
@@ -244,11 +260,11 @@ const deleteProduct = async function (req, res) {
         }
         const deletedDetails = await productModel.findOneAndUpdate({ _id: productId },{ $set: { isDeleted: true, deletedAt: new Date() } }, {new:true})
 
-        return res.status(200).send({ status: true, message: 'Product deleted successfully.', data:deletedDetails })
+        return res.status(200).send({ status: true, message: 'Product deleted successfully.' })
     }
     catch(error){
         return res.status(500).json({ status: false, message: error.message });
     }
 }
 
-module.exports = {createProduct,getProductbyId,updateProduct,deleteProduct}
+module.exports = {createProduct, getProductbyId, getProducts,updateProduct,deleteProduct}
