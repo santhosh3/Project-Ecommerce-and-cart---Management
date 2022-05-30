@@ -19,6 +19,7 @@ router.put("/products/:productId",productController.updateProduct)
 router.delete("/products/:productId",productController.deleteProduct)
 
 /*******************************Cart Api *******************************/
+
 router.post("/users/:userId/cart", middleWare.userAuth, cartController.createCart)
 
 module.exports = router;

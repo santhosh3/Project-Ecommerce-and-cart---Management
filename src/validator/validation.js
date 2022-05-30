@@ -3,8 +3,7 @@ const { default: mongoose } = require("mongoose");
 const isValid = function (value){
     if (typeof (value) === "undefined" || typeof (value) === null) {return false}
     if (typeof (value) === "string" && value.trim().length > 0) {return true}
-    if (typeof (value) === "number" && value.toString().trim().length > 0){return true}
-    if (typeof (value) === null){return false}
+    
 }
 
 // The test() method executes a search for a match between a regular expression and a specified string. Returns true or false.
@@ -43,5 +42,10 @@ const isValidInstalments = (installments)=>{
    return /^[0-9]+$/.test(installments)
 }
 
+const isValidNum = (num) => {
+    return /^[0-9]*[1-9]+$|^[1-9]+[0-9]*$/.test(num);
+  }
+  
 
-module.exports = {isValid,isEmailValid,isPhoneValid,isValidPincode, isValidObjectId,isValidSize,isValidString,isValidPrice,isValidInstalments}
+
+module.exports = {isValid,isEmailValid,isPhoneValid,isValidPincode, isValidObjectId,isValidSize,isValidString,isValidPrice,isValidInstalments,isValidNum}

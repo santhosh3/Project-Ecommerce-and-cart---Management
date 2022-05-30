@@ -9,8 +9,8 @@ const bcrypt = require("bcrypt")
 let createUser = async (req,res) =>{
     try {
         // extract data and file from RequestBody
-        let data = req.body
-        let files = req.files
+        const data = req.body
+        const files = req.files
 
         // checking if user does not enters any data
         if (Object.keys(data) == 0) { return res.status(400).send({status:false,message:"No data provided"})}
@@ -62,7 +62,7 @@ let createUser = async (req,res) =>{
 
         if (!(validator.isValid(address.shipping.city))) { return res.status(400).send({ status: true, message: " city address is required" }) }
 
-        if (!(validator.isValid(address.shipping.pincode))) { return res.status(400).send({ status: true, message: " pincode address is required" }) }
+        if ((validator.isValid(address.shipping.pincode))) { return res.status(400).send({ status: true, message: " pincode address is required" }) }
 
         if (!(validator.isValidPincode(address.shipping.pincode))) { return res.status(400).send({status:false, message:"Please provide pincode in 6 digit number"})}
 
@@ -72,7 +72,7 @@ let createUser = async (req,res) =>{
 
         if (!(validator.isValid(address.billing.city))) { return res.status(400).send({ status: true, message: " city address is required" }) }
 
-         if (!(validator.isValid(address.billing.pincode))) { return res.status(400).send({ status: true, message: " pincode address is required" }) } 
+         if ((validator.isValid(address.billing.pincode))) { return res.status(400).send({ status: true, message: " pincode address is required" }) } 
          
          if (!(validator.isValidPincode(address.billing.pincode))) { return res.status(400).send({ status: true, message: " pincode address is required" }) }
 
