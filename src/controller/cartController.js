@@ -16,12 +16,12 @@ const createCart = async (req,res) => {
         //checking for valid input
         if (Object.keys(data).length == 0) { return res.status(400).send({status:false, message:"please provide data"}) }
 
-        data.userId = userId
 
           // AUTHORISATION
           if(userId !== req.userId) {
             return res.status(401).send({status: false, message: "Unauthorised access"})
         }
+        if(data.userId !== req.userId){ return res.status(400).send({status:false, message:"please provide valid UserId"}) }
 
         // checking if userId exist or not 
         const cartCheck = await cartModel.findOne({userId:userId})
@@ -117,6 +117,8 @@ const updateCart = async (req,res)=>{
         const data = req.body
         const {cartId,productId,removeProduct} = data
 
+        console.log(data,"checking")
+
         // checking data coming or not in req body
         if (Object.keys(data).length == 0) { return res.status(400).send({status:false, message:"please provide data"}) }
 
@@ -135,16 +137,16 @@ const updateCart = async (req,res)=>{
         if (!validator.isValidObjectId(cartId)) { return res.status(400).send({status:false, message:"please provide valid CartId"}) }
 
         // checking for product Id 
-        if (!validator.isValid(productId)) { return res.status(400).send({status:false, message:"please provide  productId"}) }
+        if (!(validator.isValid(productId))) { return res.status(400).send({status:false, message:"please provide productId"}) }
 
         if (!validator.isValidObjectId(productId)) { return res.status(400).send({status:false, message:"please provide valid productId"}) }
 
         // checking for 
-        if (!validator.isValid(removeProduct)) { return res.status(400).send({status:false, message:"please enter what produvt ypu want to remove"}) }
+        // if (!validator.isValid(removeProduct)) { return res.status(400).send({status:false, message:"please enter what product you want to remove"}) }
 
         // finding cart by using findById method
         const findCartByID = await cartModel.findById({_id: cartId})
-
+        // console.log(findCartByID);
         if(!findCartByID) { return res.status(400).send({status:false, message:"opps! cart not found"})}
 
         // checking that cart is empty or not
@@ -157,6 +159,7 @@ const updateCart = async (req,res)=>{
 
         // checking uesrId
         const cartMatch = await cartModel.findOne({userId:userId})
+        // console.log(cartMatch)
         
         if (!cartMatch) { return res.status(401).send({status:false,message})}
 

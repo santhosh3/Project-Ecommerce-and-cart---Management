@@ -21,5 +21,10 @@ router.delete("/products/:productId",productController.deleteProduct)
 /*******************************Cart Api *******************************/
 
 router.post("/users/:userId/cart", middleWare.userAuth, cartController.createCart)
+router.put("/users/:userId/cart", middleWare.userAuth, cartController.updateCart)
+router.get("/users/:userId/cart", middleWare.userAuth, cartController.getCart)
+
+
 
 module.exports = router;
+
