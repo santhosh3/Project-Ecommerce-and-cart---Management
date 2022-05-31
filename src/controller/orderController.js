@@ -138,14 +138,6 @@ const updateOrder =async function(req,res) {
             return res.status(400).send({status: false, message: "user does not exist"})
         }
 
-        if(!validator.isValid(status)) {
-            return res.status(400).send({status: false, message: "Order status is required"})
-        }
-
-        if (['pending', 'completed', 'cancelled'].indexOf(status) == -1) {
-            return res.status(400).send({status: false, message: "Invalid order status or it is pending"})
-        }
-
         if(orderSearch.cancellable == false) {
             return res.status(400).send({status: false, message: "Order is not cancellable"})
         }
@@ -159,7 +151,7 @@ const updateOrder =async function(req,res) {
         }
 
         if (orderSearch.cancellable == true  && orderSearch.status == 'pending') {
-            let updatedData = await orderModel.findOneAndUpdate({ _id: orderId }, { $set: { status: status } }, { new: true })
+            let updatedData = await orderModel.findOneAndUpdate({ _id: orderId }, { $set: { status: "cancelled" } }, { new: true })
             return res.status(200).send({ status: false, message: "Order cancelled Successfully", data: updatedData });
         }
     }

@@ -154,7 +154,7 @@ const getDetails = async function (req, res) {
 
 const updateUser = async function(req, res) {
 
-  let data = req.body;
+  const data = req.body;
   const files = req.files
   
   const userIdFromParams = req.params.userId
@@ -236,10 +236,10 @@ const updateUser = async function(req, res) {
       updatedData.password = hash
   }
   //========================================address validation=================================
-
-  let address = JSON.parse(data.address)
+if(data.address){
+  const address = JSON.parse(data.address)
     data.address = address
-
+ 
     if (!(validator.isValid(address.shipping.street)))
          { return res.status(400).send({ status: true, message: " Street address is required" }) }
 
@@ -250,7 +250,7 @@ const updateUser = async function(req, res) {
 
           updatedData["address.shipping.city"] = address.shipping.city
           
-          if (!(validator.isValid(address.shipping.pincode))) { return res.status(400).send({ status: true, message: " pincode address is required" }) }
+          if ((validator.isValid(address.shipping.pincode))) { return res.status(400).send({ status: false, message: " pincode address is required" }) }
 
           if (!(validator.isValidPincode(address.shipping.pincode))) { return res.status(400).send({status:false, message:"Please provide pincode in 6 digit number"})}
           updatedData["address.shipping.pincode"] = address.shipping.pincode
@@ -267,11 +267,11 @@ const updateUser = async function(req, res) {
 
           updatedData["address.billing.city"] = address.billing.city
 
-          if (!(validator.isValid(address.billing.pincode))) { return res.status(400).send({ status: true, message: " pincode address is required" }) }
+          if ((validator.isValid(address.billing.pincode))) { return res.status(400).send({ status: false, message: " pincode address is required" }) }
 
         if (!(validator.isValidPincode(address.billing.pincode))) { return res.status(400).send({status:false, message:"Please provide pincode in 6 digit number"})}
           updatedData["address.billing.pincode"] = address.billing.pincode
-      
+}    
  //=========================================update data=============================
 
   const updatedUser = await userModel.findOneAndUpdate({ _id: userIdFromParams }, updatedData, { new: true })
