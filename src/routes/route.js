@@ -29,6 +29,8 @@ router.delete("/users/:userId/cart", middleWare.userAuth, cartController.deleteC
 /*******************************Order Api *******************************/
 
 router.post("/users/:userId/orders", middleWare.userAuth, orderController.createOrder)
+router.put("/users/:userId/orders", middleWare.userAuth, orderController.updateOrder)
+
 
 
 
