@@ -2,10 +2,8 @@ const userModel = require("../model/userModel")
 const productModel = require("../model/productModel")
 const cartModel = require("../model/cartModel")
 const validator = require("../validator/validation")
-const { validate } = require("../model/userModel")
 
 /*********************************** Create Cart ************************************/
-
 
 const createCart = async (req,res) => {
   
@@ -30,7 +28,7 @@ const createCart = async (req,res) => {
             // checking items in data 
             if (data.items.length == 0) return res.status(400).send({status:false, message:"Product quantity should be 1"})
 
-            // validating items in data
+            // validating items in data 
             for (let i=0; i<data.items.length; i++){
                 if(!validator.isValidObjectId(data.items[i].productId)) return res.status(400).send({status: false, message: `Product-Id for ${i+1} product is invalid`})
 
@@ -110,108 +108,90 @@ const createCart = async (req,res) => {
 
 }
 
-
-const updateCart = async (req,res)=>{
+const updateCart = async function(req,res) {
     try{
-        const userId = req.params.userId
-        const data = req.body
-        const {cartId,productId,removeProduct} = data
-
-        console.log(data,"checking")
-
-        // checking data coming or not in req body
-        if (Object.keys(data).length == 0) { return res.status(400).send({status:false, message:"please provide data"}) }
-
-        // checking for valid userId
-        if(!validator.isValidObjectId(userId)){
-            return res.status(400).send({ status: false, msg: "UserId is Invalid"})
+        const body = req.body
+        const userId = req.params.userId;
+     
+        if(!validator.isValidObjectId(userId)) {
+            return res.status(400).send({ status: false, msg: "Invalid parameters"});
         }
 
-        if(req.userId != userId){
-            return res.status(400).send({ status: false, msg: "You are not authorize."})
+        const userSearch = await userModel.findById({_id:userId})
+        if(!userSearch) {
+            return res.status(400).send({status: false, msg: "userId does not exist"})
         }
-       
-        // checking for valid carId 
-        if (!validator.isValid(cartId)) { return res.status(400).send({status:false, message:"please provide  cardId"}) }
 
-        if (!validator.isValidObjectId(cartId)) { return res.status(400).send({status:false, message:"please provide valid CartId"}) }
+        if(userId !== req.userId) {
+            return res.status(401).send({status: false, msg: "Unauthorised access"})
+        }
 
-        // checking for product Id 
-        if (!(validator.isValid(productId))) { return res.status(400).send({status:false, message:"please provide productId"}) }
+        const {cartId, productId, removeProduct} = body
 
-        if (!validator.isValidObjectId(productId)) { return res.status(400).send({status:false, message:"please provide valid productId"}) }
+        if(!validator.isValid(cartId)) {
+            return res.status(400).send({status: false, msg: "CartId is required"})
+        }
 
-        // checking for 
-        // if (!validator.isValid(removeProduct)) { return res.status(400).send({status:false, message:"please enter what product you want to remove"}) }
+        if(!validator.isValidObjectId(cartId)) {
+            return res.status(400).send({status: false, msg: "Invalid cartId"})
+        }
 
-        // finding cart by using findById method
-        const findCartByID = await cartModel.findById({_id: cartId})
-        // console.log(findCartByID);
-        if(!findCartByID) { return res.status(400).send({status:false, message:"opps! cart not found"})}
+        if(!validator.isValid(productId)) {
+            return res.status(400).send({status: false, msg: "productId is required"})
+        }
 
-        // checking that cart is empty or not
-        if(findCartByID.totalItems == 0 && findCartByID.totalPrice == 0) { return res.status(400).send({status:false,message:"cart is empty"})}
+        if(!validator.isValidObjectId(productId)) {
+            return res.status(400).send({status: false, msg: "Invalid productId"})
+        }
 
-        // finding user by using findOne method
-        const findUser = await userModel.findOne({_id:userId, isDeleted: false})
+        const cartSearch = await cartModel.findOne({_id: cartId})
+        if(!cartSearch) {
+            return res.status(404).send({status: false, msg: "Cart does not exist"})
+        }
 
-        if (!findUser) {return res.status(404).send({status:false,message:"Opps! we can't find any user with this input"}) }
+        const productSearch = await productModel.findOne({ _id: productId})
+        if(!productSearch) {
+            return res.status(404).send({status: false, msg: "product does not exist"})
+        }
 
-        // checking uesrId
-        const cartMatch = await cartModel.findOne({userId:userId})
-        // console.log(cartMatch)
-        
-        if (!cartMatch) { return res.status(401).send({status:false,message})}
+        if(productSearch.isDeleted == true) {
+            return res.status(400).send({status: false, msg: "Product is already deleted"})
+        }
 
-        //  checking that product is present in our data-base
-        const product = await productModel.findOne({_id:productId, isDeleted:false})
+        if((removeProduct != 0) && (removeProduct != 1)) {
+            return res.status(400).send({status: false, msg: "Invalid remove product"})
+        }
 
-        if (!product) { return res.status(404).send({status:false,message:"Opps! Product not found"})}
 
-        // let's remove the product from the cart
-        if(removeProduct == 0){
-            for(let i = 0; i<findCartByID.items.length; i++){
-                if (findCartByID.items[i].productId == productId){
-                    let initialPrice = product.price*findCartByID.items.quantity
-                    let updatedPrice = findCartByID.totalPrice - initialPrice
-                    findCartByID.items.splice(i, 1)
-                    let updatedItems = findCartByID.totalItems -1
-
-                    let updatedPriceAndItems = await cartModel.findOneAndUpdate({userId:userId},{items:findCartByID.items,totalPrice:updatedPrice,totalItems:updatedItems},{new:true})
-                        return res.status(200).send({status:true,message:"successfully Updated data",data:updatedPriceAndItems})
+        const cart = cartSearch.items
+        for(let i=0; i<cart.length; i++) {
+            if(cart[i].productId == productId) {
+                const priceChange = cart[i].quantity * productSearch.price
+                if(removeProduct == 0) {
+                    const productRemove = await cartModel.findOneAndUpdate({_id: cartId}, {$pull: {items:{productId: productId}}, totalPrice: cartSearch.totalPrice-priceChange, totalItems:cartSearch.totalItems-1}, {new:true})
+                    return res.status(200).send({status: true, msg: "Removed product successfully", data: productRemove})
                 }
-                else if( removeProduct == 1){
-                    for(let i = 0; i<findCartByID.items.length; i++){
-                        if (findCartByID.items[i].productId == productId){
-                            let updateQuantity = findCartByID.items[i].quantity - 1
-                            if(updateQuantity < 1){
-                                let updatedItems = findCartByID.totalItems - 1
-                                let productPrice = product.price * findCartByID.items[i].quantity
-                                let updatedPrice = findCartByID.totalPrice - productPrice
-                                findCartByID.items.splice(i,1)
 
-                                let updatedPriceAndItems = await cartModel.findOneAndUpdate({userId:userId},{items:findCartByID.items,totalPrice:updatedPrice,totalItems:updatedItems},{new:true})
-                                    return res.status(200).send({status:true,message:"successfully Updated data",data:updatedPriceAndItems}) 
-                            }
-                            else{
-                                findCartByID.items[i].quantity = updateQuantity
-                                let updatedPrice = findCartByID.totalPrice - ([product.price * 1])
-                                let updatedPriceAndItems = await cartModel.findOneAndUpdate({userId:userId},{items:findCartByID.items,totalPrice:updatedPrice,totalItems:updatedItems},{new:true})
-                                    return res.status(200).send({status:true,message:"successfully Updated data",data:updatedPriceAndItems})
-                            }
-                        }
+                if(removeProduct == 1) {
+                    if(cart[i].quantity == 1 && removeProduct == 1) {
+                     const priceUpdate = await cartModel.findOneAndUpdate({_id: cartId}, {$pull: {items: {productId: productId}}, totalPrice:cartSearch.totalPrice-priceChange, totalItems:cartSearch.totalItems-1}, {new: true})
+                     return res.status(200).send({status: true, msg: "Successfully removed product or cart is empty", data: priceUpdate})
+                }
 
-                    }
-                 
+                cart[i].quantity = cart[i].quantity - 1
+                const updatedCart = await cartModel.findByIdAndUpdate({_id: cartId}, {items: cart, totalPrice:cartSearch.totalPrice - productSearch.price}, {new: true})
+                return res.status(200).send({status: true, msg: "sucessfully decremented the product", data: updatedCart})
                 }
             }
         }
-
+        
     }
-    catch(error){
-        res.status(500).send({status:false,message:error.message})
-    }
+    catch (error) {
+        console.log("This is the error :", error.message)
+        res.status(500).send({ msg: "Error", error: error.message })
+    } 
 }
+
 
 const getCart = async (req,res) => {
     try{
