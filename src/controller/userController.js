@@ -2,9 +2,9 @@ const userModel = require("../model/userModel")
 const validator = require("../validator/validation")
 const jwt = require("jsonwebtoken");
 const aws = require("../aws/aws")
-const bcrypt = require("bcrypt")
+const bcrypt = require("bcrypt");
 
-/*************************************************creting user*************************************************************************** */
+/*************************************************creting user************************************************ */
 
 let createUser = async (req,res) =>{
     try {
@@ -21,7 +21,10 @@ let createUser = async (req,res) =>{
             data.profileImage = uploadFileUrl
             
         }
-        else{"please provide the image"}
+        else{
+           return res.status(400).send({ status: false, message: "profileImage is required"})
+        }
+
 
         // checking for fname 
         if (!(validator.isValid(data.fname))) { return res.status(400).send({status:false, message:"please enter first name"}) }
@@ -67,7 +70,6 @@ let createUser = async (req,res) =>{
         if (!(validator.isValidPincode(address.shipping.pincode))) { return res.status(400).send({status:false, message:"Please provide pincode in 6 digit number"})}
 
         // for billing address
-
         if (!(validator.isValid(address.billing.street))) { return res.status(400).send({ status: true, message: " Street address is required" }) }
 
         if (!(validator.isValid(address.billing.city))) { return res.status(400).send({ status: true, message: " city address is required" }) }
@@ -115,19 +117,15 @@ const loginUser = async function (req, res) {
        {
         userId: findUser._id.toString(),
         iat: currTime,
-        exp: currTime + 84600
-      }, "functionUp"
-
-    );
+        exp: currTime + 36000
+      }, "functionUp" )
     res.header('Authorization', token)
-    // console.log(token)
     return res.status(200).send({ status: true, message: 'User login successfull', data:{userId: `${findUser._id}`, token: token} });
   }
 
   catch(error){
     res.status(500).send({status:false, message:error.message})
   }
-  
 }
 
 const getDetails = async function (req, res) {
@@ -141,7 +139,7 @@ const getDetails = async function (req, res) {
               return res.status(404).send({ status: false, message: "No user Found" });
           }  
           if (userId != req.userId) {  
-            return res.status(401).send({ status: false, message: "not Authorize" });
+            return res.status(403).send({ status: false, message: "not Authorize" });
           } 
             return res.status(200).send({ status: true, message: "User Profile Details...", data: findData })
 
@@ -150,7 +148,7 @@ const getDetails = async function (req, res) {
       res.status(500).send({ status: false, message: err });
   }
 }
-/***************************************************update code******************************************************************************* */
+/***************************************************update user details******************************************************************************* */
 
 const updateUser = async function(req, res) {
 
@@ -235,8 +233,9 @@ const updateUser = async function(req, res) {
      
       updatedData.password = hash
   }
+  
   //========================================address validation=================================
-if(data.address){
+ if(data.address){
   const address = JSON.parse(data.address)
     data.address = address
  

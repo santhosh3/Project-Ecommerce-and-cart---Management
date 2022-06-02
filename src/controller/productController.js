@@ -128,6 +128,7 @@ const createProduct = async function (req, res) {
             console.log("only 2 given");
             filterQuery['price'] = { $lte: priceLessThan }
         }
+
     
         if (priceSort) {
             if (priceSort == 1) {
@@ -138,7 +139,12 @@ const createProduct = async function (req, res) {
             if (priceSort == -1) {
                 const products = await productModel.find(filterQuery).sort({ price: -1 })
                 if(Object.keys(products).length ==0){return res.status(400).send({status:false, message: "No product found"})}
+
                 return res.status(200).send({ status: true, message: 'Success', data: products })
+
+            }
+            else{
+                return res.status(400).send({status:false, message:"please provide 1 or -1"})
             }
         }
         const products = await productModel.find(filterQuery)
@@ -267,14 +273,10 @@ const updateProduct = async function (req, res) {
 
         if(isFreeShipping) {
             if(validator.isValid(isFreeShipping)){
-                if(isFreeShipping != Boolean){
-                return res.status(400).send({ status: false, message: "Invalid isFreeShipping" })
-                }
                 dataObject["isFreeShipping"] = isFreeShipping
             }
-
         }
-    
+
         let updatedProduct = await productModel.findOneAndUpdate({_id:productId},dataObject,{ new: true })
 
         if(!updatedProduct) {

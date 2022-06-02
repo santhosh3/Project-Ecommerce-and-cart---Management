@@ -16,11 +16,10 @@ const createCart = async (req,res) => {
 
 
           // AUTHORISATION
-          if(userId !== req.userId) {
-            return res.status(401).send({status: false, message: "Unauthorised access"})
+           if(userId !== req.userId) {
+            return res.status(403).send({status: false, message: "Unauthorised access"})
         }
         if(data.userId !== req.userId){ return res.status(400).send({status:false, message:"please provide valid UserId"}) }
-
         // checking if userId exist or not 
         const cartCheck = await cartModel.findOne({userId:userId})
 
@@ -47,11 +46,12 @@ const createCart = async (req,res) => {
                     data.totalPrice = 0;
                 }
                 data.totalPrice += productCheck.price * data.items[i].quantity
+                // 0 = 0 + 40 * 2 => 80
             }
             data.totalItems = data.items.length
             await cartModel.create(data);
 
-            let resData = await cartModel.findOne({userId}).populate('items.productId')
+            let resData = await cartModel.findOne({userId})  //.populate('items.productId')
             return res.status(201).send({ status: true, message: "Products added to the cart", data: resData })
         }
 
@@ -78,6 +78,7 @@ const createCart = async (req,res) => {
           //check if productId already exist in database or not
           tempCart.items.map(x => {
             if(x.productId.toString() == data.items[i].productId) {
+                console.log(x.productId.toString())
               x.quantity += data.items[i].quantity;
               tempCart.totalPrice += checkProduct.price * data.items[i].quantity
             }
@@ -98,7 +99,7 @@ const createCart = async (req,res) => {
           {_id: data.cartId},
           tempCart,
           {new: true}
-        ).populate('items.productId')
+        ).select({_id: 0})
         res.status(200).send({ status: true, message: "Products added to the cart", data: updateCart })
       } 
         
@@ -112,7 +113,11 @@ const updateCart = async function(req,res) {
     try{
         const body = req.body
         const userId = req.params.userId;
-     
+
+        if(Object.keys(body) == 0){
+            return res.status(400).send({ status: false, msg: "Please provide data to update."});
+        }
+
         if(!validator.isValidObjectId(userId)) {
             return res.status(400).send({ status: false, msg: "Invalid parameters"});
         }
@@ -183,6 +188,7 @@ const updateCart = async function(req,res) {
                 return res.status(200).send({status: true, msg: "sucessfully decremented the product", data: updatedCart})
                 }
             }
+           return res.status(400).send({ status: false, message: "Product does not found in the cart"})
         }
         
     }
@@ -202,9 +208,9 @@ const getCart = async (req,res) => {
         }
 
         // AUTHORISATION
-        if(userId !== req.userId) {
+           if(userId !== req.userId) {
             return res.status(401).send({status: false, message: "Unauthorised access"})
-        }
+        } 
 
         // to check user present or not
         const userSearch = await userModel.findById({_id:userId})

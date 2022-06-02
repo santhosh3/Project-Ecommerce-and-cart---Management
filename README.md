@@ -213,7 +213,8 @@ Send [form-data](https://developer.mozilla.org/en-US/docs/Web/API/FormData)
   - _**On error**_ - Return a suitable error message with a valid HTTP status code. The response should be a JSON object like [this](#error-response-structure)
 
 ### GET /products
-- Returns all products in the collection that aren't deleted.
+- Returns all products in 
+the collection that aren't deleted.
   - __Filters__
     - Size (The key for this filter will be 'size')
     - Product name (The key for this filter will be 'name'). You should return all the products with name containing the substring recieved in this filter
