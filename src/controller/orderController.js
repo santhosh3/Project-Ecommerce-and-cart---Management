@@ -79,7 +79,7 @@ const createOrder = async function(req,res) {
         let createdOrder = await orderModel.create(order)
 
         await cartModel.findOneAndUpdate({userId:userId}, {items:[], totalItems:0, totalPrice:0}, {new: true})
-        return res.status(201).send({status: true, message: "Successfully created Order", data: createdOrder})
+        return res.status(201).send({status: true, message: "Success", data: createdOrder})
         
         
     }
@@ -157,7 +157,7 @@ const updateOrder =async function(req,res) {
 
         if (orderSearch.cancellable == true  && orderSearch.status == 'pending') {
             let updatedData = await orderModel.findOneAndUpdate({ _id: orderId }, { $set: { status:status} }, { new: true })
-            return res.status(200).send({ status: true, message: "Order updated Successfully", data: updatedData });
+            return res.status(200).send({ status: true, message: "Success", data: updatedData });
         }
     }
     catch (error) {

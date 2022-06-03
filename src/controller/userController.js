@@ -18,12 +18,11 @@ let createUser = async (req,res) =>{
         // checking files are coming or not
         if ( files && files.length > 0){
             let uploadFileUrl = await aws.uploadFile(files[0])
-            data.profileImage = uploadFileUrl
-            
+            data.profileImage = uploadFileUrl            
         }
-        else{
+         /* else{
            return res.status(400).send({ status: false, message: "profileImage is required"})
-        }
+        }  */
 
 
         // checking for fname 
@@ -49,8 +48,12 @@ let createUser = async (req,res) =>{
 
         // checking for password
         if (!data.password) return res.status(400).send({ status: false, message: "please enter password"})
-        if(data.password.trim().length<8 || data.password.trim().length>15) {return res.status(400).send({ status: false, message: 'Password should be of minimum 8 characters & maximum 15 characters' })}
+        /* if(data.password.trim().length<8 || data.password.trim().length>15) {return res.status(400).send({ status: false, message: 'Password should be of minimum 8 characters & maximum 15 characters' })}
+ */
 
+        if (!validator.validPassword(data.password)) {
+          return res.status(400).send({ status: false, message:  'Password should be of minimum 8 characters & maximum 15 characters' })
+      }
         // using bcrypt
         const rounds = 10;
          let hash = await bcrypt.hash(data.password, rounds);
@@ -59,24 +62,23 @@ let createUser = async (req,res) =>{
         // checking for address
         let address = JSON.parse(data.address)
         data.address = address
+        if(!address) { return res.status(400).send({ status: true, message: " address is required" }) }
          
         // for shipping address
         if (!(validator.isValid(address.shipping.street))) { return res.status(400).send({ status: true, message: " Street address is required" }) }
 
         if (!(validator.isValid(address.shipping.city))) { return res.status(400).send({ status: true, message: " city address is required" }) }
 
-        if ((validator.isValid(address.shipping.pincode))) { return res.status(400).send({ status: true, message: " pincode address is required" }) }
+        if (!(validator.isValid(address.shipping.pincode))) { return res.status(400).send({ status: true, message: " pincode address is required" }) }
 
-        if (!(validator.isValidPincode(address.shipping.pincode))) { return res.status(400).send({status:false, message:"Please provide pincode in 6 digit number"})}
 
         // for billing address
         if (!(validator.isValid(address.billing.street))) { return res.status(400).send({ status: true, message: " Street address is required" }) }
 
         if (!(validator.isValid(address.billing.city))) { return res.status(400).send({ status: true, message: " city address is required" }) }
 
-         if ((validator.isValid(address.billing.pincode))) { return res.status(400).send({ status: true, message: " pincode address is required" }) } 
+         if (!(validator.isValid(address.billing.pincode))) { return res.status(400).send({ status: true, message: " pincode address is required" }) } 
          
-         if (!(validator.isValidPincode(address.billing.pincode))) { return res.status(400).send({ status: true, message: " pincode address is required" }) }
 
 
         let result = await userModel.create(data)
@@ -249,9 +251,9 @@ const updateUser = async function(req, res) {
 
           updatedData["address.shipping.city"] = address.shipping.city
           
-          if ((validator.isValid(address.shipping.pincode))) { return res.status(400).send({ status: false, message: " pincode address is required" }) }
+          if (!(validator.isValid(address.shipping.pincode))) { return res.status(400).send({ status: false, message: " pincode address is required" }) }
 
-          if (!(validator.isValidPincode(address.shipping.pincode))) { return res.status(400).send({status:false, message:"Please provide pincode in 6 digit number"})}
+/*           if (!(validator.isValid(address.shipping.pincode))) { return res.status(400).send({status:false, message:"Please provide pincode in 6 digit number"})} */
           updatedData["address.shipping.pincode"] = address.shipping.pincode
       
 
@@ -266,9 +268,9 @@ const updateUser = async function(req, res) {
 
           updatedData["address.billing.city"] = address.billing.city
 
-          if ((validator.isValid(address.billing.pincode))) { return res.status(400).send({ status: false, message: " pincode address is required" }) }
+          if ((!validator.isValid(address.billing.pincode))) { return res.status(400).send({ status: false, message: " pincode address is required" }) }
 
-        if (!(validator.isValidPincode(address.billing.pincode))) { return res.status(400).send({status:false, message:"Please provide pincode in 6 digit number"})}
+        /* if (!(validator.isValidPincode(address.billing.pincode))) { return res.status(400).send({status:false, message:"Please provide pincode in 6 digit number"})} */
           updatedData["address.billing.pincode"] = address.billing.pincode
 }    
  //=========================================update data=============================

@@ -2,7 +2,8 @@ const { default: mongoose } = require("mongoose");
 //@ts-check
 const isValid = function (value){
     if (typeof (value) === "undefined" || typeof (value) === null) {return false}
-    if (typeof (value) === "string" && value.trim().length > 0) {return true}  
+    if (typeof (value) === "string" && value.trim().length == 0) {return false} 
+    return true 
 }
 
 // The test() method executes a search for a match between a regular expression and a specified string. Returns true or false.
@@ -15,12 +16,17 @@ const isPhoneValid = function(phone){
     return /^[6-9]\d{9}$/.test(phone)
 }
 
-const isValidPincode = function(pincode){
+/* const isValidPincode = function(pincode){
     if ( /^\+?([1-9]{1})\)?([0-9]{5})$/.test(pincode)) {return true}
-}
+} */
 
 const isValidObjectId = function(objectId) {
     return mongoose.Types.ObjectId.isValid(objectId)
+}
+
+const validPassword = function (password) {
+    if (password.length <= 8 || password.length >= 15) return false
+    return true
 }
 
 
@@ -50,4 +56,4 @@ const isValidBoolean = (value) => {
 }
   
 
-module.exports = {isValid,isEmailValid,isPhoneValid,isValidPincode, isValidObjectId,isValidSize,isValidBoolean,isValidString,isValidPrice,isValidInstalments,isValidNum}
+module.exports = {isValid,isEmailValid,isPhoneValid, validPassword, isValidObjectId,isValidSize,isValidBoolean,isValidString,isValidPrice,isValidInstalments,isValidNum}
