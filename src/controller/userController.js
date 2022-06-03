@@ -9,7 +9,9 @@ const bcrypt = require("bcrypt");
 let createUser = async (req,res) =>{
     try {
         // extract data and file from RequestBody
-        const data = req.body
+        const data = JSON.parse(JSON.stringify(req.body))
+
+        console.log(data)
         const files = req.files
 
         // checking if user does not enters any data
@@ -20,9 +22,9 @@ let createUser = async (req,res) =>{
             let uploadFileUrl = await aws.uploadFile(files[0])
             data.profileImage = uploadFileUrl            
         }
-         /* else{
+        else{
            return res.status(400).send({ status: false, message: "profileImage is required"})
-        }  */
+        }  
 
 
         // checking for fname 
@@ -48,8 +50,6 @@ let createUser = async (req,res) =>{
 
         // checking for password
         if (!data.password) return res.status(400).send({ status: false, message: "please enter password"})
-        /* if(data.password.trim().length<8 || data.password.trim().length>15) {return res.status(400).send({ status: false, message: 'Password should be of minimum 8 characters & maximum 15 characters' })}
- */
 
         if (!validator.validPassword(data.password)) {
           return res.status(400).send({ status: false, message:  'Password should be of minimum 8 characters & maximum 15 characters' })
@@ -59,26 +59,35 @@ let createUser = async (req,res) =>{
          let hash = await bcrypt.hash(data.password, rounds);
          data.password = hash;
 
+
         // checking for address
         let address = JSON.parse(data.address)
-        data.address = address
-        if(!address) { return res.status(400).send({ status: true, message: " address is required" }) }
-         
+
+        console.log(address, "check")
+        
+        
+        if(!validator.isValid(address)) { return res.status(400).send({ status: false, message: " address is required" }) }
+
+        console.log(validator.isValid(address.shipping))
+        if(!validator.isValid(address.shipping)) { return res.status(400).send({ status: false, message: " address shipping is required" }) }
         // for shipping address
-        if (!(validator.isValid(address.shipping.street))) { return res.status(400).send({ status: true, message: " Street address is required" }) }
+        console.log(validator.isValid(address.shipping.street))
+        if (!(validator.isValid(address.shipping.street))) { return res.status(400).send({ status: false, message: " Street address is required" }) }
 
-        if (!(validator.isValid(address.shipping.city))) { return res.status(400).send({ status: true, message: " city address is required" }) }
+        
+        if (!(validator.isValid(address.shipping.city))) { return res.status(400).send({ status: false, message: " city address is required" }) }
 
-        if (!(validator.isValid(address.shipping.pincode))) { return res.status(400).send({ status: true, message: " pincode address is required" }) }
+        if (!(validator.isValid(address.shipping.pincode))) { return res.status(400).send({ status: false, message: " pincode address is required" }) }
 
 
         // for billing address
-        if (!(validator.isValid(address.billing.street))) { return res.status(400).send({ status: true, message: " Street address is required" }) }
+        if (!(validator.isValid(address.billing.street))) { return res.status(400).send({ status: false, message: " Street address is required" }) }
 
-        if (!(validator.isValid(address.billing.city))) { return res.status(400).send({ status: true, message: " city address is required" }) }
+        if (!(validator.isValid(address.billing.city))) { return res.status(400).send({ status: false, message: " city address is required" }) }
 
-         if (!(validator.isValid(address.billing.pincode))) { return res.status(400).send({ status: true, message: " pincode address is required" }) } 
+         if (!(validator.isValid(address.billing.pincode))) { return res.status(400).send({ status: false, message: " pincode address is required" }) } 
          
+         data.address = address
 
 
         let result = await userModel.create(data)
