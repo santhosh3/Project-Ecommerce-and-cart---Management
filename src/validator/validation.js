@@ -25,7 +25,7 @@ const isValidObjectId = function(objectId) {
 }
 
 const validPassword = function (password) {
-    if (password.length <= 8 || password.length >= 15) return false
+    if (password.length < 8 || password.length > 15) return false
     return true
 }
 
