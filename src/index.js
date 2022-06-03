@@ -9,17 +9,15 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(multer().any())
 
-
-mongoose.connect("mongodb+srv://sankalesh8668:790602030305@cluster0.pymsd.mongodb.net/group09Database", {
-    useNewUrlParser: true
-})
-.then( () => console.log("MongoDb is connected"))
-.catch ( err => console.log(err) )
+try{
+     mongoose.connect("mongodb+srv://sankalesh8668:790602030305@cluster0.pymsd.mongodb.net/group09Database", {useNewUrlParser: true})
+     console.log("MongoDb is connected successfully...")
+    } 
+catch (error) { 
+     console.log(error) 
+    }
 
 
 app.use('/', route)
 
-
-app.listen(process.env.PORT || 3000, function () {
-    console.log('Express app running on port ' + (process.env.PORT || 3000))
-});
+app.listen(3000, console.log('Express App is Running on port 3000'))

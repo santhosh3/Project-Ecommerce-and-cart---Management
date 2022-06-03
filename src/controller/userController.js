@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 const aws = require("../aws/aws")
 const bcrypt = require("bcrypt");
 
-/*************************************************creting user************************************************ */
+/************************************************* creting user ************************************************ */
 
 let createUser = async (req,res) =>{
     try {
