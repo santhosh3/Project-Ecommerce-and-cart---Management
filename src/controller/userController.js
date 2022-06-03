@@ -122,7 +122,7 @@ const loginUser = async function (req, res) {
         exp: currTime + 36000
       }, "functionUp" )
     res.header('Authorization', token)
-    return res.status(200).send({ status: true, message: 'User login successfull', data:{userId: `${findUser._id}`, token: token} });
+    return res.status(201).send({ status: true, message: 'Success', data:{userId: `${findUser._id}`, token: token} });
   }
 
   catch(error){
